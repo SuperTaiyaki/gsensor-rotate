@@ -11,13 +11,11 @@ class Sysfs
     
     folders.each do |folder|
       File.open("#{folder}/name") do |f|
-        if f.read.chomp == "gravity"
-          return folder
-        end
+        return folder if f.read.chomp == "gravity"
       end
     end
 
-    return "NOT_FOUND" # fuck EXCEPTION
+    return "NOT_FOUND" # Should throw a real exception
   end
   @@path = Sysfs.find_gravity_sensor()
 
@@ -47,8 +45,10 @@ class GSensor
     p sensor
 
     # Determine which axis has the highest magnitude
-    max = sensor.max_by { |x| x.abs }
-    max_axis = sensor.find_index {|y| y == max || y == max * -1}
+    # Don't care if the tablet is face-up flat
+    sensor[2] = 0
+    max = sensor.max_by { |i| i.abs }
+    max_axis = sensor.find_index {|k| k == max || k == max * -1}
 
     # zeroes are annoying. Forcing a re-scan would be an easy workaround
     if max_axis == 1

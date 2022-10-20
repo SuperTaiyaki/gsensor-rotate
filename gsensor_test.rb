@@ -43,5 +43,21 @@ class GSensorTest < MiniTest::Test
   #    assert_equal sensor.orientation, :normal
   #  end
   #end
+
+  def test_flat_kickstand
+    sensor = GSensor.new
+    # If the screen is straight up, we want to take the next highest axis
+    Sysfs.stub :raw_sensor, [0, 200_000, 1_000_000] do
+      assert_equal sensor.orientation, :normal
+    end
+
+    Sysfs.stub :raw_sensor, [0, -200_000, 1_000_000] do
+      assert_equal sensor.orientation, :inverted
+    end
+
+    Sysfs.stub :raw_sensor, [-200_000, 0, 1_000_000] do
+      assert_equal sensor.orientation, :left
+    end
+  end
 end
 
